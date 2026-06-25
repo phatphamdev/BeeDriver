@@ -1,0 +1,61 @@
+/* Font Import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@import "tailwindcss";
+
+/* ========================================
+   BeeDriver - Global Styles
+   ======================================== */
+
+/* CSS Variables */
+:root {
+  --bee-yellow: #F5A623;
+  --bee-yellow-dark: #D4891C;
+  --bee-dark: #0F1923;
+  --bee-dark-2: #1A2636;
+  --bee-dark-3: #243447;
+  --bee-border: rgba(255, 255, 255, 0.08);
+
+  /* Status colors */
+  --status-offline: #EF4444;
+  --status-idle: #22C55E;
+  --status-picking: #EAB308;
+  --status-delivering: #3B82F6;
+}
+
+/* Reset & Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  background-color: var(--bee-dark);
+  color: rgba(255, 255, 255, 0.87);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bee-dark-2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
