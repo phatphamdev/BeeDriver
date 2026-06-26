@@ -276,21 +276,22 @@ export default function Workspace() {
           input.accept = 'image/*';
           input.capture = 'environment';
           
-          let fileSelected = false;
+          input.style.display = 'none';
+          document.body.appendChild(input);
+          
           input.onchange = (e) => {
-            fileSelected = true;
             const file = e.target.files[0];
+            document.body.removeChild(input);
             if (file) resolve(file);
             else reject(new Error('Chưa chụp ảnh'));
           };
 
-          window.addEventListener('focus', () => {
-            setTimeout(() => {
-              if (!fileSelected) reject(new Error('Đã hủy chụp ảnh'));
-            }, 500);
-          }, { once: true });
+          // LƯU Ý: Bỏ theo dõi sự kiện 'focus' vì iOS Safari hay kích hoạt nhầm lúc đang mở camera
+          // Nếu tài xế bấm hủy trên iOS, trạng thái sẽ bị treo ở Đang xử lý, họ chỉ cần vuốt lại.
 
-          input.click();
+          setTimeout(() => {
+            input.click();
+          }, 100);
         });
 
         showToast('Đang tải ảnh lên...', 'info');
