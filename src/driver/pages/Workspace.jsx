@@ -250,21 +250,95 @@ export default function Workspace() {
 
     setUpdating(button.id);
 
-    const { data, error } = await supabase
-      .from('drivers')
-      .update({ status: button.targetStatus })
-      .eq('id', driverInfo.id)
-      .select()
-      .single();
+    try {
+      // 1. Luôn lấy vị trí GPS
+      let lat = null;
+      let lng = null;
+      try {
+        const pos = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+        });
+        lat = pos.coords.latitude;
+        lng = pos.coords.longitude;
+      } catch (err) {
+        showToast('Vui lòng bật Định vị (GPS) để tiếp tục!', 'error');
+        setUpdating(null);
+        return;
+      }
 
-    if (error) {
-      showToast('Cập nhật thất bại. Vui lòng thử lại.', 'error');
-    } else {
+      let photoUrl = driverInfo.last_photo_url;
+
+      // 2. Chụp ảnh (nếu là Giao hàng thành công -> button.id === 'done-rest')
+      if (button.id === 'done-rest') {
+        const file = await new Promise((resolve, reject) => {
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = 'image/*';
+          input.capture = 'environment';
+          
+          let fileSelected = false;
+          input.onchange = (e) => {
+            fileSelected = true;
+            const file = e.target.files[0];
+            if (file) resolve(file);
+            else reject(new Error('Chưa chụp ảnh'));
+          };
+
+          window.addEventListener('focus', () => {
+            setTimeout(() => {
+              if (!fileSelected) reject(new Error('Đã hủy chụp ảnh'));
+            }, 500);
+          }, { once: true });
+
+          input.click();
+        });
+
+        showToast('Đang tải ảnh lên...', 'info');
+        
+        const fileExt = file.name.split('.').pop() || 'jpg';
+        const fileName = `${driverInfo.id}_${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('checkins')
+          .upload(fileName, file);
+
+        if (uploadError) throw new Error('Lỗi tải ảnh: ' + uploadError.message);
+
+        const { data: publicUrlData } = supabase.storage
+          .from('checkins')
+          .getPublicUrl(fileName);
+
+        photoUrl = publicUrlData.publicUrl;
+      }
+
+      // 3. Cập nhật Database
+      const { data, error } = await supabase
+        .from('drivers')
+        .update({ 
+          status: button.targetStatus,
+          latitude: lat,
+          longitude: lng,
+          last_photo_url: photoUrl
+        })
+        .eq('id', driverInfo.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
       setDriverInfo(data);
       showToast(`Đã chuyển sang: ${STATUS_DISPLAY[button.targetStatus].label}`, 'success');
+      
+    } catch (err) {
+      console.error(err);
+      if (err.message === 'Đã hủy chụp ảnh') {
+         showToast('Vui lòng chụp ảnh để hoàn thành đơn!', 'error');
+      } else {
+         showToast(err.message || 'Cập nhật thất bại. Vui lòng thử lại.', 'error');
+      }
+    } finally {
+      setUpdating(null);
     }
-
-    setUpdating(null);
   };
 
   const handleSignOut = async () => {

@@ -82,6 +82,38 @@ export default function DriverStatusCard({ driver }) {
               </Typography>
             </Box>
           )}
+
+          {driver.latitude && driver.longitude && (
+            <Box display="flex" alignItems="center" gap={1} mt={0.5}>
+              <span style={{ fontSize: 14 }}>📍</span>
+              <a 
+                href={`https://maps.google.com/?q=${driver.latitude},${driver.longitude}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ color: '#3B82F6', fontSize: '0.75rem', textDecoration: 'none' }}
+                onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+                onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+              >
+                Xem vị trí trên bản đồ
+              </a>
+            </Box>
+          )}
+
+          {driver.last_photo_url && (
+            <Box display="flex" alignItems="center" gap={1} mt={0.5}>
+              <span style={{ fontSize: 14 }}>📸</span>
+              <a 
+                href={driver.last_photo_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ color: '#22C55E', fontSize: '0.75rem', textDecoration: 'none' }}
+                onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+                onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+              >
+                Xem ảnh Check-in
+              </a>
+            </Box>
+          )}
         </Box>
       </CardContent>
     </Card>
